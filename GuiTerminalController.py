@@ -7,20 +7,15 @@ from Terminal import Terminal
 class GuiTerminalController:
 
     def __init__(self):
-        # self.__db = DataBaseController()
         self.__terminal = None
 
-    def terminal_exist(self, terminal_id):
-        # return self.__db.terminal_exist(terminal_id)
-        return
-
-    def add_terminal(self, terminal_id, name):
-        self.__terminal = Terminal(terminal_id)
-        # datetime object containing current date and time
-        now = datetime.now()
-        # dd/mm/YY H:M:S
-        dt_string = now.strftime("%H:%M %d/%m/%Y")
-        print("date and time =", dt_string)
+    #def add_terminal(self, terminal_id, name):
+    #    self.__terminal = Terminal(terminal_id)
+     #   # datetime object containing current date and time
+     #   now = datetime.now()
+     #   # dd/mm/YY H:M:S
+     #   dt_string = now.strftime("%H:%M %d/%m/%Y")
+     #   print("date and time =", dt_string)
 
     def new_log(self, rfid):
         if self.__terminal is None:
@@ -33,6 +28,8 @@ class GuiTerminalController:
         self.__terminal.publish_configuration(id, name, pin)
 
     def reset_terminal(self):
+        if self.__terminal is None:
+            self.__terminal = Terminal("-1")
         self.__terminal.reset()
         self.__terminal = None
 

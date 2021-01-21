@@ -30,7 +30,7 @@ class Timer(threading.Thread):
             self.quit()
             self.gui.show_terminal_status("Nie udało sie dodać temrinala,\nUpłynął czas na wprowadzenie pinu")
         except:
-            print("Koniec wątku")
+            pass
 
     def quit(self):
         self.label.config(text="end")
@@ -51,7 +51,6 @@ class GuiServer:
         self.init_bar()
         self.__main_frame = Frame(self.__window)
         self.__main_frame.pack(fill=BOTH, expand=TRUE)
-        # self.init_frame()
         self.init_left_frame()
         self.init_right_frame()
         self.__time_for_add_terminal = 60
@@ -61,24 +60,46 @@ class GuiServer:
     def init_bar(self):
         self.__menubar = Menu(self.__window)
         self.__menu = Menu(self.__menubar, tearoff=0)
-        self.__menu.add_command(label="Clear database")
+        self.__menu.add_command(label="Clear database", command=self.clear_datebase)
         self.__menu.add_separator()
         self.__menu.add_command(label="Exit", command=self.__window.quit)
         self.__menubar.add_cascade(label="Menu", menu=self.__menu)
 
         self.__tools = Menu(self.__menubar, tearoff=0)
-        self.__tools.add_command(label="Clear log", command=self.clear_log)
+        self.__tools.add_command(label="Clear log field", command=self.clear_log)
         self.__tools.add_separator()
-        self.__tools.add_command(label="Time for entry pin short")
-        self.__tools.add_command(label="Time for entry pin medium")
-        self.__tools.add_command(label="Time for entry pin long")
+        self.__tools.add_command(label="Time for entry pin short", command=lambda: self.set_time(30))
+        self.__tools.add_command(label="Time for entry pin medium", command=lambda: self.set_time(60))
+        self.__tools.add_command(label="Time for entry pin long", command=lambda: self.set_time(90))
         self.__menubar.add_cascade(label="Tools", menu=self.__tools)
 
         self.__help = Menu(self.__menubar, tearoff=0)
         self.__menubar.add_cascade(label="Help", menu=self.__help)
-        self.__help.add_command(label="About")
+        self.__help.add_command(label="About", command=self.show_help)
+        self.__help.add_command(label="Information", command=self.show_info)
 
         self.__window.config(menu=self.__menubar)
+
+    def show_help(self):
+        messagebox.showinfo("Informacja", "Aby dodać pracownika należy wejść w zakładkę 'Dodaj pracownika'\n"
+                                          "Aby dodać terminal należy wejść w zakładkę 'Dodaj terminal'\n"
+                                          "Aby wygenerować raport należy wejść w zakładkę 'Generuj raport' lub 'Generuj inny raport'\n"
+                                          "Aby edytować pracowników należy wejść w zakładkę 'Lista pracowników'\n"
+                                          "Aby usunąć terminal należy wejść w zakładkę 'Lista terminali'")
+
+    def show_info(self):
+        messagebox.showinfo("Informacja", "Nazwa: System Ewidencji Czasu Pracy Pracowników\n"
+                                          "Wersja programu: V.2\n"
+                                          "Wykonawca: Konstanty Hnat")
+
+    def set_time(self, time):
+        self.__time_for_add_terminal = time
+
+    def clear_datebase(self):
+        res = messagebox.askyesno("Are you sure?",
+                                  "Are you sure you want to permanently delete data from the database?")
+        if res:
+            self.__app.erase_datebase()
 
     def init_frame(self):
         self.__main_frame = Frame(self.__window)
@@ -87,21 +108,21 @@ class GuiServer:
     def init_left_frame(self):
         self.__left_frame = Frame(self.__main_frame)
         self.__left_frame.pack(side=LEFT)
-        add_worker_button = Button(self.__left_frame, text="Dodaj pracownika", width=20, command=self.add_worker_window)
+        add_worker_button = Button(self.__left_frame, text="Dodaj pracownika", width=23, command=self.add_worker_window)
         add_worker_button.pack(padx=10, pady=10)
 
-        workers_list_button = Button(self.__left_frame, text="Lista pracowników", width=20,
+        workers_list_button = Button(self.__left_frame, text="Lista pracowników", width=23,
                                      command=self.workers_list_window)
         workers_list_button.pack(padx=10, pady=10)
 
-        raport_button = Button(self.__left_frame, text="Generuj raport pracowników", width=20,
+        raport_button = Button(self.__left_frame, text="Generuj raport pracowników", width=23,
                                command=self.raport_window)
         raport_button.pack(padx=10, pady=10)
-        add_terminal_button = Button(self.__left_frame, text="Dodaj terminal", width=20,
+        add_terminal_button = Button(self.__left_frame, text="Dodaj terminal", width=23,
                                      command=self.add_terminal_window)
         add_terminal_button.pack(padx=10, pady=10)
 
-        terminls_list_button = Button(self.__left_frame, text="Lista terminali", width=20,
+        terminls_list_button = Button(self.__left_frame, text="Lista terminali", width=23,
                                       command=self.terminals_list_window)
         terminls_list_button.pack(padx=10, pady=10)
 
@@ -109,13 +130,9 @@ class GuiServer:
             self.__window.withdraw()
             new_window = Tk()
             new_window.title("Server - create raport")
-            #top_frame = Frame(new_window)
-            #top_frame.pack(fill=X, padx=10, pady=10)
             lok_label = Label(new_window, text="Lokalizacja raportu", anchor="w", width=15)
-            # lok_label.pack(side=LEFT, padx=5)
             lok_label.grid(row=0, column=0, padx=10, pady=10)
             lok_entry = Entry(new_window, width=25)
-            # lok_entry.pack(side=LEFT, padx=5)
             lok_entry.grid(row=0, column=1, padx=10, pady=10)
 
             def chose_location():
@@ -123,19 +140,13 @@ class GuiServer:
                 lok_entry.delete(0, "end")
                 lok_entry.insert(0, answer)
 
-            #lok_label.pack(side=LEFT, padx=5)
             lok_bt = Button(new_window, text="Wybierz", command=chose_location, width=20)
-            # lok_bt.pack(side=LEFT, padx=5)
             lok_bt.grid(row=0, column=2, padx=10, pady=10)
 
-            # sec_frame = Frame(new_window)
-            # sec_frame.pack(fill=X, padx=10, pady=10)
             name_label = Label(new_window, text="Nazwa raportu", anchor="w", width=15)
             name_label.grid(row=1, column=0, padx=10, pady=10)
-            # name_label.pack(side=LEFT, padx=5)
             name_entry = Entry(new_window, width=25)
             name_entry.grid(row=1, column=1, padx=10, pady=10)
-            # name_entry.pack(side=LEFT, padx=25)
 
             variable = StringVar(new_window)
             variable.set("Terminali")  # default value
@@ -147,16 +158,13 @@ class GuiServer:
 
             def create():
                 if self.check_valid(lok_entry.get(), name_entry.get()):
-                    path = lok_entry.get()+'/'+name_entry.get()+'.csv'
+                    path = lok_entry.get() + '/' + name_entry.get() + '.csv'
                     if variable.get() == 'Terminali':
                         self.insert_new_log('Utworzono raport terminali, scieżka {0}\n'.format(path))
                         self.__app.create_terminal_rap(path)
                     if variable.get() == 'Logów pracowników':
                         self.insert_new_log('Utworzono raport logów pracowników, scieżka {0}\n'.format(path))
                         self.__app.create_work_log(path)
-                    if variable.get() == 'Logów terminali':
-                        self.insert_new_log('Utworzono raport pracowników, scieżka {0}\n'.format(path))
-                        self.__app.create_terminal_log(path)
                     self.__window.deiconify()
                     new_window.destroy()
 
@@ -169,20 +177,18 @@ class GuiServer:
             save_bt = Button(new_window, text="Zapisz", width=10, command=create)
             save_bt.grid(row=3, column=1, padx=10, pady=10)
 
-        log_work_rap_bt = Button(self.__left_frame, text="Generuj inny raport", width=20,
+        log_work_rap_bt = Button(self.__left_frame, text="Generuj inny raport", width=23,
                                  command=create_another_raport)
         log_work_rap_bt.pack(padx=10, pady=10)
-
 
     def init_right_frame(self):
         right_frame = Frame(self.__main_frame)
         right_frame.pack(padx=10, pady=10, fill=BOTH, expand=TRUE)
-        top_frame = right_frame = Frame(right_frame)
-        top_frame.pack(side=LEFT, fill=BOTH)
-        name_label = Label(top_frame, text="Logi:", width=20, anchor="w")
-        name_label.pack(fill=BOTH)
-        self.__resultsfiled = Text(right_frame, state=NORMAL)
-        self.__resultsfiled.pack(fill=Y, expand=TRUE)
+
+        log_frame = LabelFrame(right_frame, text="Logi")
+        log_frame.pack(padx=10, pady=10, fill=BOTH, expand=TRUE)
+        self.__resultsfiled = Text(log_frame, state=NORMAL)
+        self.__resultsfiled.pack(padx=10, pady=10, fill=BOTH, expand=TRUE)
 
     def insert_new_log(self, log):
         self.__logs_list.append(log)
@@ -281,25 +287,26 @@ class GuiServer:
         salary_entry.config(validate='key', validatecommand=(sal_reg, '%P'))
 
         def date_valid(input):
-            date_time_obj = datetime.strptime(input, '%m/%d/%y')
-            now = datetime.now()
-            diff = now - date_time_obj
-            years = divmod(diff.total_seconds(), 31536000)[0]
-            if years > 18:
-                return True
-            else:
-                messagebox.showinfo("Informacja", "Pracownik jest niepełnoletni")
-                return False
+            try:
+                date_time_obj = datetime.strptime(input, '%m/%d/%Y')
+                now = datetime.now()
+                diff = now - date_time_obj
+                years = divmod(diff.total_seconds(), 31536000)[0]
+                if years > 18:
+                    return True
+                else:
+                    #messagebox.showinfo("Informacja", "Pracownik jest niepełnoletni")
+                    return False
+            except:
+                pass
+                #messagebox.showinfo("Informacja", "Data jest nie poprawna")
 
         birt_reg = self.__window.register(date_valid)
-        date_entry = DateEntry(right_frame, width=22, textvariable=date)
+        date_entry = DateEntry(right_frame, width=22, textvariable=date, date_pattern='dd/mm/yyyy')
         date_entry.pack(padx=5, pady=6)
         date = datetime.strptime('01/01/2000', '%d/%m/%Y')
         date_entry.set_date(date)
-        date_entry.config(validate='focusout', validatecommand=(birt_reg, '%P'))
-
-        # self.__calendar = Calendar(right_frame, selectmode='day', locale='en_US', cursor="hand2", year=2020, month=7, day=1)
-        # self.__calendar.pack(padx=5, pady=5)
+        #date_entry.config(validate='focusout', validatecommand=(birt_reg, '%P'))
 
         def add_worker():
 
@@ -317,7 +324,13 @@ class GuiServer:
             salary = salary_entry.get()
             if salary == "":
                 mess += "Pensja nie może być pusta\n"
-            birth = str(date_entry.get_date().strftime("%d/%m/%Y"))
+
+            if date_valid(date_entry.get_date().strftime("%d/%m/%Y")):
+                birth = str(date_entry.get_date().strftime("%d/%m/%Y"))
+            else:
+                mess += "Data jest nie poprawna lub pracownik jest niepełnoletni"
+            #else:
+            #    mess += "Data jest nieprawidłowa"
             currentDate = str(datetime.today().strftime("%d/%m/%Y"))
             if len(mess) < 35:
                 name_entry.delete(0, END)
@@ -407,8 +420,6 @@ class GuiServer:
             surname_entry.pack(padx=5, pady=5)
 
             def rfid_validate(input):
-                print(input)
-                print(self.__app.rfid_occupied(input))
                 if self.__app.rfid_occupied(input):
                     messagebox.showinfo("Informacja", "Ten numer RFID jest już zajety")
                     return False
@@ -435,7 +446,7 @@ class GuiServer:
             email_entry.config(validate='focusout', validatecommand=(email_reg, '%P'))
 
             def number_validate(input):
-                if input.isdigit() and len(input) < 10:
+                if len(input) != 9 or not input.isdigit() or len(input) != 11:
                     return True
                 else:
                     return False
@@ -449,7 +460,8 @@ class GuiServer:
             reg = self.__window.register(number_validate)
             number_entry = Entry(right_frame, width=25, textvariable=number)
             number_entry.pack(padx=5, pady=6)
-            number_entry.config(validate='key', validatecommand=(reg, '%P'))
+            number_entry.config(validate='focusout', validatecommand=(reg, '%P'))
+
             sal_reg = self.__window.register(salary_validate)
             salary_entry = Entry(right_frame, width=25, textvariable=salary)
             salary_entry.pack(padx=5, pady=6)
@@ -489,7 +501,7 @@ class GuiServer:
                 name = name_entry.get()
                 if name == "":
                     mess += "Imie nie może być puste\n"
-                surname = salary_entry.get()
+                surname = surname_entry.get()
                 if surname == "":
                     mess += "Nazwisko nie może być puste\n"
                 rfid = rfid_entry.get() if rfid_entry.get() != "" else "Brak"
@@ -562,8 +574,8 @@ class GuiServer:
         lok_entry.pack(side=LEFT, padx=5)
 
         def chose_location():
-            my_filetypes = [('all files', '.*'), ('text files', '.txt')]
-            answer = filedialog.askdirectory()
+            answer = filedialog.askdirectory(parent=self.__window,
+                                             initialdir=os.getcwd())
             lok_entry.delete(0, "end")
             lok_entry.insert(0, answer)
 
@@ -606,8 +618,6 @@ class GuiServer:
                 del worker['workTimeTable']
                 list.insert(worker['_id'], worker)
 
-        # list_frame = Frame(self.__main_frame)
-        # four_frame.pack(padx=10, pady=10, fill=X, expand="yes")
         del_bt = Button(list_frame, text="Usuń", width=15, command=delete_worker)
         del_bt.pack(side=RIGHT, padx=10, pady=10)
         undo_bt = Button(list_frame, text="Cofnij", width=15, command=undo)
@@ -704,7 +714,7 @@ class GuiServer:
         reward_ckb.pack()
 
         def create_raport():
-            if self.isValid(lok_entry.get(), name_entry.get()):
+            if self.check_valid(lok_entry.get(), name_entry.get()):
                 to_delete = []
                 headers_row = ['_id']
                 if name_var.get() == 0:
@@ -761,7 +771,8 @@ class GuiServer:
                     headers_row.append('reward')
 
                 location = lok_entry.get() + '/' + name_entry.get()
-                self.__logs_list.append('Utworzono raport pracowników, scieżka {0}\n'.format(location))
+                self.__logs_list.append('Utworzono raport pracowników, scieżka {0}.csv\n'.format(location))
+                self.close()
                 self.__app.create_raport(location, deleted_workers, headers_row, to_delete)
 
         four_frame = Frame(self.__main_frame)
@@ -775,10 +786,10 @@ class GuiServer:
         mess = "Błędne dane\n"
         if not os.path.isdir(dir):
             mess += "Podany folder nie istnieje\n"
-        if os.path.exists(dir + '/' + file) and file != "":
-            mess += "Plik o podanej nazwie już istnieje, dokonaj zmiany, aby nie utracić danych\n"
+        if os.path.exists(dir + '/' + file+'.csv'):
+            mess += "Plik o podanej nazwie już istnieje, dokonaj zmiany, aby kontynuować\n"
         if file == "":
-            mess += "Wprowadz nazwe pliku"
+            mess += "Wprowadź nazwę pliku"
         if len(mess) > 15:
             messagebox.showinfo("Informacja", mess)
             return False
@@ -821,7 +832,9 @@ class GuiServer:
         def is_valid():
             mess = ""
             if self.__app.terminal_exist(id_entry.get()):
-                mess += 'Terminal o taki id już istnieje'
+                mess += 'Terminal o takim id już istnieje'
+            if id_entry.get() == "":
+                mess += 'Brak id terminala'
             if name_entry.get() == "":
                 mess += "Nazwa jest za krótka"
             if len(mess) > 0:
@@ -837,7 +850,7 @@ class GuiServer:
 
             top_frame = Frame(self.__main_frame)
             top_frame.pack(fill=X, padx=10, pady=10, expand=TRUE)
-            id_label = Label(top_frame, text="ID terminala: {0}".format(id), width=20, anchor='w')
+            id_label = Label(top_frame, text="ID terminala: {0}".format(id), width=30, anchor='w')
             id_label.pack(side=LEFT, pady=10)
 
             mid_frame = Frame(self.__main_frame)
@@ -876,8 +889,6 @@ class GuiServer:
         next_bt.pack(side=RIGHT, pady=10, padx=10)
 
     def show_terminal_status(self, status):
-        # self.__timer.stop()
-        # self.__timer = None
         self.close()
         messagebox.showinfo("Informacja", status)
 
@@ -894,24 +905,19 @@ class GuiServer:
         for terminal in terminals:
             list.insert(END, terminal)
 
-        def edit():
-            pass
-
         def delete():
             if list.curselection():
                 selectedTerminal = list.get(ANCHOR)
                 json_acceptable_string = selectedTerminal.replace("'", "\"")
                 dict = json.loads(json_acceptable_string)
                 list.delete(ANCHOR)
-                self.__logs_list.append("Usunięto pracownika id: {0}\n".format(dict['_id']))
+                self.__logs_list.append("Usunięto termianal id: {0}\n".format(dict['_id']))
                 self.__app.delete_terminal(dict["_id"])
             else:
-                messagebox.showinfo("Informacja", "Należy coś wybrać do usunięcia")
+                messagebox.showinfo("Informacja", "Należy wybrać coś do usunięcia")
 
         close_bt = Button(self.__main_frame, text="Close", command=self.close, width=15)
         close_bt.pack(pady=20, padx=20, side=LEFT)
-        # edit_bt = Button(self.__main_frame, text="Edit", command=edit, width=15)
-        # edit_bt.pack(pady=20, padx=20, side=LEFT)
         delete_bt = Button(self.__main_frame, text="Delete", command=delete, width=15)
         delete_bt.pack(pady=20, padx=20, side=LEFT)
 
@@ -920,7 +926,7 @@ class GuiServer:
 
     def init_main_frame(self):
         self.__main_frame = Frame(self.__window)
-        self.__main_frame.pack()
+        self.__main_frame.pack(fill=BOTH, expand=TRUE)
 
 
 if __name__ == "__main__":

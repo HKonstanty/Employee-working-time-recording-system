@@ -1,5 +1,3 @@
-from asyncio import sleep
-
 from pymongo import MongoClient
 
 
@@ -15,6 +13,8 @@ class DataBaseController:
 
     def insert_worker(self, worker):
         id = self.__workers.count_documents({})
+        while self.__workers.count_documents({'_id': id}) > 0:
+            id += 1
         worker["_id"] = id
         self.__workers.insert_one(worker)
 
@@ -22,14 +22,9 @@ class DataBaseController:
         id = self.__logs.count_documents({})
         terminal_id = logDate[2]
         rfid = logDate[0]
-        # date = {"hour": logDate[1][0], "minute": logDate[1][1], "day": logDate[1][2], "month": logDate[1][3],
-        #       "year": logDate[1][4]}
         date = '{0}:{1} {2}.{3}.{4}'.format(logDate[1][0], logDate[1][1], logDate[1][2], logDate[1][3], logDate[1][4])
         log = {"_id": id, "terminalID": terminal_id, "RFID": rfid, "date": date, "status": status}
         self.__logs.insert_one(log)
-
-    def insert_terminal_log(self, logTerminal):
-        pass
 
     def insert_terminal(self, terminal):
         self.__terminals.insert_one(terminal)
@@ -51,9 +46,6 @@ class DataBaseController:
 
     def worker_log(self, logDate):
         RFID = logDate[0]
-        # date = {"hour": logDate[1][0], "minute": logDate[1][1], "day": logDate[1][2], "month": logDate[1][3],
-        #        "year": logDate[1][4]}
-        # date = '{0}:{1} {2}.{3}.{4}'.format(logDate[1][0], logDate[1][1], logDate[1][2], logDate[1][3], logDate[1][4])
         date = logDate[1]
         terminalID = logDate[2]
         worker = self.__workers.find({"RFID": RFID})
@@ -80,3 +72,8 @@ class DataBaseController:
 
     def get_worker(self, id):
         return self.__workers.find_one({"_id": id})
+
+    def erase_db(self):
+        self.__workers.drop()
+        self.__terminals.drop()
+        self.__logs.drop()

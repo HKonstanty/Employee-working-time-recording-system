@@ -33,29 +33,23 @@ class Server:
         id = date["_id"]
         name = date["name"]
         pin = date['pin']
-        print(1)
         if id == self.__tempTerminal.id and self.__tempTerminal.name == name and self.__tempTerminal.pin == pin:
-            print(2)
             data = date['date']
             add_date = '{0}:{1} {2}.{3}.{4}'.format(data[0], data[1], data[2], data[3], data[4])
             del date['pin']
             terminal = {"_id": id, "name": name, "date": add_date}
             self.__db.insert_terminal(terminal)
-            # self.__db.insert_terminal_log(date)
             mess = "Terminal {0} został dodany pomyślnie\n".format(name)
         elif id != self.__tempTerminal.id or self.__tempTerminal.name != name or self.__tempTerminal.pin != pin:
             mess = "Terminal nie został dadany z powodu różnych danych\n"
         else:
             mess = "Nie udało sie podłączyć terminala z nieznanych przyczyn\n"
-        print(mess)
         self.__controller.terminal_status(mess)
         self.__controller.insert_new_log(mess)
         self.__broker.unsuscribe()
         self.__tempTerminal = None
 
     def get_pin(self):
-        # pin = random.randint(1000, 9999)
-        # self.__tempTerminal = TempTerminal(pin)
         return self.__tempTerminal.pin
 
     def create_temp_terminal(self, id, name):
@@ -69,3 +63,39 @@ class Server:
 
     def unsubscribe_conf(self):
         self.__broker.unsuscribe()
+
+    def add_worker(self, worker_dict):
+        self.__db.insert_worker(worker_dict)
+
+    def erase_datebase(self):
+        self.__db.erase_db()
+
+    def rfid_exist(self, rfid):
+        return self.__db.rfid_exist(rfid)
+
+    def get_workers(self):
+        return self.__db.get_workers()
+
+    def get_terminals(self):
+        return self.__db.get_terminals()
+
+    def update_worker(self, worker_dict):
+        self.__db.update_worker(worker_dict)
+
+    def delete_worker(self, worker_id):
+        self.__db.delete_worker(worker_id=worker_id)
+
+    def insert_terminal(self, terminal):
+        self.__db.insert_terminal(terminal)
+
+    def delete_terminal(self, terminal_id):
+        self.__db.delete_terminal(terminal_id=terminal_id)
+
+    def terminal_exist(self, terminal_id):
+        return self.__db.terminal_exist(id=terminal_id)
+
+    def get_logs(self):
+        return self.__db.get_logs()
+
+    def get_worker(self, id):
+        return self.__db.get_worker(id=id)

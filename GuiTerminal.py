@@ -1,9 +1,7 @@
-import threading
-from time import sleep
-from tkinter import messagebox
-from datetime import datetime
-from GuiTerminalController import GuiTerminalController
 from tkinter import *
+from tkinter import messagebox
+
+from GuiTerminalController import GuiTerminalController
 
 
 class GuiTerminal:
@@ -52,10 +50,6 @@ class GuiTerminal:
             self.save()
 
     def save(self):
-        # if self.__app.terminal_exist(self.__id_entry.get()):
-        #    messagebox.showerror(title="Warning", message="Terminal o podanym ID już istnieje")
-        # else:
-        #    self.__app.add_terminal(self.__id_entry.get(), self.__name_entry.get())
         self.__window.title("Terminal " + str(self.__name_entry.get()))
         self.__app.send_conf(self.__id_entry.get(), self.__name_entry.get(), self.__pin_entry.get())
         self.__main_frame.destroy()

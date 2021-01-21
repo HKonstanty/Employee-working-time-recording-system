@@ -7,15 +7,18 @@ import paho.mqtt.client as mqtt
 
 class Terminal:
     BROKER_ADDRESS = "127.0.0.1"
+    #BROKER_ADDRESS = "DESKTOP-RA3JCSK"
     TOPIC_LOG = "login/worker"
     TOPIC_CONF = "terminal/configuration"
     PORT = 1883
+    #PORT = 8883
     CONFIG_FILE = 'config_file.txt'
 
     def __init__(self, id):
         self.__ID = id
         self.__client = mqtt.Client(id)
-        self.__client.connect(Terminal.BROKER_ADDRESS)
+        #self.__client.tls_set("ca.crt")
+        self.__client.connect(Terminal.BROKER_ADDRESS, Terminal.PORT)
         self.__name = ""
         self.init_terminal()
 
